@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Valhalla Orca Sightings Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    #map { height: 100vh; }
+    #filter { padding: 10px; background: white; z-index: 1000; position: absolute; top: 10px; left: 10px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    .filter-button { margin: 2px; padding: 4px 8px; cursor: pointer; background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+    .filter-button:hover { background-color: #ddd; }
+  </style>
+</head>
+<body>
+
+  <div id="filter"></div>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+
+  <script>
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ0bXDtQS9VHl5ftfRBBH46E5A4DA-41ukHNdusCZ0DbS9vkKGzp03Xb3TyXrFcApgbnzUh3lPf1BmO/pub?gid=0&single=true&output=csv';
+
+    const map = L.map('map').setView([70.2, 21.2], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18
+    }).addTo(map);
+
+    let allMarkers = [];
+
+    function addMarkers(data, behaviourFilter = null) {
+      allMarkers.forEach(marker => map.removeLayer(marker));
+      allMarkers = [];
+
+      data.forEach(row => {
+        const lat = parseFloat(row.LATITUDE);
+        const lng = parseFloat(row.LONGITUDE);
+        const behaviour = row.BEHAVIOUR || 'Unknown';
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+          if (!behaviourFilter || behaviour === behaviourFilter) {
+            const popupContent = `
+              <b>Species:</b> ${row.SPECIES || ''}<br>
+              <b>Behaviour:</b> ${behaviour}<br>
+              <b>Date:</b> ${row.DATE || ''} ${row.TIME || ''}<br>
+              <b>Individuals:</b> ${row['# INDIVIDUALS'] || ''} | Calves: ${row.CALVES || ''} | Group size: ${row['GROUP SIZE'] || ''}<br>
+              <b>Weather:</b> ${row.WEATHER || ''}<br>
+              <b>Notes:</b> ${row.NOTES || ''}
+            `;
+            const marker = L.marker([lat, lng]).addTo(map);
+            marker.bindPopup(popupContent);
+            allMarkers.push(marker);
+          }
+        }
+      });
+    }
+
+    Papa.parse(csvUrl, {
+      download: true,
+      header: true,
+      complete: function(results) {
+        const data = results.data;
+        const behaviours = [...new Set(data.map(row => row.BEHAVIOUR).filter(b => b))];
+
+        const filterDiv = document.getElementById('filter');
+        filterDiv.innerHTML = `<span class="filter-button" onclick="addMarkers(window.data)">All</span>`;
+        behaviours.forEach(beh => {
+          filterDiv.innerHTML += `<span class="filter-button" onclick="addMarkers(window.data, '${beh}')">${beh}</span>`;
+        });
+
+        window.data = data;
+        addMarkers(data);
+      }
+    });
+  </script>
+
+</body>
+</html>
