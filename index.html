@@ -21,60 +21,8 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
 
   <script>
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ0bXDtQS9VHl5ftfRBBH46E5A4DA-41ukHNdusCZ0DbS9vkKGzp03Xb3TyXrFcApgbnzUh3lPf1BmO/pub?gid=0&single=true&output=csv';
+    // Added cache-busting query param:
+    const csvUrl = 'https://doc
 
-    const map = L.map('map').setView([70.2, 21.2], 8);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18
-    }).addTo(map);
 
-    let allMarkers = [];
 
-    function addMarkers(data, behaviourFilter = null) {
-      allMarkers.forEach(marker => map.removeLayer(marker));
-      allMarkers = [];
-
-      data.forEach(row => {
-        const lat = parseFloat(row.LATITUDE);
-        const lng = parseFloat(row.LONGITUDE);
-        const behaviour = row.BEHAVIOUR || 'Unknown';
-
-        if (!isNaN(lat) && !isNaN(lng)) {
-          if (!behaviourFilter || behaviour === behaviourFilter) {
-            const popupContent = `
-              <b>Species:</b> ${row.SPECIES || ''}<br>
-              <b>Behaviour:</b> ${behaviour}<br>
-              <b>Date:</b> ${row.DATE || ''} ${row.TIME || ''}<br>
-              <b>Individuals:</b> ${row['# INDIVIDUALS'] || ''} | Calves: ${row.CALVES || ''} | Group size: ${row['GROUP SIZE'] || ''}<br>
-              <b>Weather:</b> ${row.WEATHER || ''}<br>
-              <b>Notes:</b> ${row.NOTES || ''}
-            `;
-            const marker = L.marker([lat, lng]).addTo(map);
-            marker.bindPopup(popupContent);
-            allMarkers.push(marker);
-          }
-        }
-      });
-    }
-
-    Papa.parse(csvUrl, {
-      download: true,
-      header: true,
-      complete: function(results) {
-        const data = results.data;
-        const behaviours = [...new Set(data.map(row => row.BEHAVIOUR).filter(b => b))];
-
-        const filterDiv = document.getElementById('filter');
-        filterDiv.innerHTML = `<span class="filter-button" onclick="addMarkers(window.data)">All</span>`;
-        behaviours.forEach(beh => {
-          filterDiv.innerHTML += `<span class="filter-button" onclick="addMarkers(window.data, '${beh}')">${beh}</span>`;
-        });
-
-        window.data = data;
-        addMarkers(data);
-      }
-    });
-  </script>
-
-</body>
-</html>
