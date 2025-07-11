@@ -28,6 +28,42 @@
       maxZoom: 18
     }).addTo(map);
 
+    const icons = {
+      FEEDING: new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      }),
+      SOCIALIZING: new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      }),
+      TRAVELING: new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      }),
+      RESTING: new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      }),
+      default: new L.Icon.Default()
+    };
+
     let allMarkers = [];
 
     function addMarkers(data, behaviourFilter = null) {
@@ -37,9 +73,8 @@
       data.forEach(row => {
         const lat = parseFloat(row.LATITUDE);
         const lng = parseFloat(row.LONGITUDE);
-        const behaviour = row.BEHAVIOUR ? row.BEHAVIOUR.trim() : '';
+        const behaviour = row.BEHAVIOUR ? row.BEHAVIOUR.trim().toUpperCase() : '';
 
-        // Only plot if lat/lng are valid and behavior exists
         if (!isNaN(lat) && !isNaN(lng) && behaviour) {
           if (!behaviourFilter || behaviour === behaviourFilter) {
             const popupContent = `
@@ -50,7 +85,8 @@
               <b>Weather:</b> ${row.WEATHER || ''}<br>
               <b>Notes:</b> ${row.NOTES || ''}
             `;
-            const marker = L.marker([lat, lng]).addTo(map);
+            const icon = icons[behaviour] || icons.default;
+            const marker = L.marker([lat, lng], { icon: icon }).addTo(map);
             marker.bindPopup(popupContent);
             allMarkers.push(marker);
           }
@@ -61,7 +97,7 @@
     Papa.parse(csvUrl, {
       download: true,
       header: true,
-      skipEmptyLines: true, // additional protection against empty lines
+      skipEmptyLines: true,
       complete: function(results) {
         const data = results.data.filter(row => row.LATITUDE && row.LONGITUDE && row.BEHAVIOUR);
         const behaviours = [...new Set(data.map(row => row.BEHAVIOUR).filter(b => b))];
@@ -80,6 +116,5 @@
 
 </body>
 </html>
-
 
 
