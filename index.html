@@ -1,4 +1,3 @@
- 
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,25 +8,25 @@
   <style>
     #map { height: 100vh; }
 
-    /* FILTER BUTTONS IN BOTTOM-LEFT */
+    /* FILTER BUTTONS stay in default position (top-left) */
     #filter {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
+      padding: 10px;
       background: white;
-      padding: 8px;
+      z-index: 1000;
+      position: absolute;
+      top: 10px;
+      left: 10px;
       border-radius: 4px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      z-index: 1000;
     }
 
     .filter-button {
-      margin: 4px;
-      padding: 6px 10px;
+      margin: 2px;
+      padding: 4px 8px;
       cursor: pointer;
       background-color: #f0f0f0;
       border: 1px solid #ccc;
-      border-radius: 6px;
+      border-radius: 4px;
       font-size: 14px;
     }
 
@@ -59,6 +58,118 @@
   <script>
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ0bXDtQS9VHl5ftfRBBH46E5A4DA-41ukHNdusCZ0DbS9vkKGzp03Xb3TyXrFcApgbnzUh3lPf1BmO/pub?gid=0&single=true&output=csv&t=' + new Date().getTime();
 
-    const map = L.map('map').setView([70.]()
+    const map = L.map('map').setView([70.2, 21.2], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18
+    }).addTo(map);
+
+    const icons = {
+      FEEDING: new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      }),
+      SOCIALIZING: new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      }),
+      TRAVELING: new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      }),
+      RESTING: new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      }),
+      default: new L.Icon.Default()
+    };
+
+    let allMarkers = [];
+
+    function normalizeBehaviour(value) {
+      return value ? value.trim().toUpperCase() : '';
+    }
+
+    function createPopupContent(row, behaviour) {
+      let popupContent = `<b>Behaviour:</b> ${behaviour}<br>`;
+      if (row.SPECIES) popupContent += `<b>Species:</b> ${row.SPECIES}<br>`;
+      if (row.DATE || row.TIME) popupContent += `<b>Date:</b> ${row.DATE || ''} ${row.TIME || ''}<br>`;
+
+      const groupSize = row['# INDIVIDUALS'] || row['GROUP SIZE'];
+      const calves = row.CALVES;
+      if (groupSize) {
+        popupContent += `<b>Group size:</b> ${groupSize}`;
+        if (calves) popupContent += ` (calves: ${calves})`;
+        popupContent += `<br>`;
+      }
+
+      if (row.WEATHER) popupContent += `<b>Weather:</b> ${row.WEATHER}<br>`;
+      if (row['ID?']) popupContent += `<b>ID:</b> ${row['ID?']}<br>`;
+      if (row.NOTES) popupContent += `<b>Notes:</b> ${row.NOTES}<br>`;
+      return popupContent;
+    }
+
+    function addMarkers(data, behaviourFilter = null) {
+      allMarkers.forEach(marker => map.removeLayer(marker));
+      allMarkers = [];
+
+      data.forEach(row => {
+        const lat = parseFloat(row.LATITUDE);
+        const lng = parseFloat(row.LONGITUDE);
+        const behaviour = normalizeBehaviour(row.BEHAVIOUR);
+
+        if (!isNaN(lat) && !isNaN(lng) && behaviour) {
+          if (!behaviourFilter || behaviour === behaviourFilter) {
+            const popupContent = createPopupContent(row, behaviour);
+            const icon = icons[behaviour] || icons.default;
+            const marker = L.marker([lat, lng], { icon: icon }).addTo(map);
+            marker.bindPopup(popupContent);
+            allMarkers.push(marker);
+          }
+        }
+      });
+    }
+
+    Papa.parse(csvUrl, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        const data = results.data.filter(row => row.LATITUDE && row.LONGITUDE && row.BEHAVIOUR);
+        const behaviours = [...new Set(data.map(row => normalizeBehaviour(row.BEHAVIOUR)).filter(b => b))];
+
+        const filterDiv = document.getElementById('filter');
+        filterDiv.innerHTML = `<span class="filter-button" onclick="addMarkers(window.data)">All</span>`;
+        behaviours.forEach(beh => {
+          filterDiv.innerHTML += `<span class="filter-button" onclick="addMarkers(window.data, '${beh}')">${beh}</span>`;
+        });
+
+        window.data = data.map(row => {
+          row.BEHAVIOUR = normalizeBehaviour(row.BEHAVIOUR);
+          return row;
+        });
+        addMarkers(window.data);
+      }
+    });
+  </script>
+
+</body>
+</html>
+ 
 
 
