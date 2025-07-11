@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,12 +9,47 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     #map { height: 100vh; }
-    #filter { padding: 10px; background: white; z-index: 1000; position: absolute; top: 10px; left: 10px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
-    .filter-button { margin: 2px; padding: 4px 8px; cursor: pointer; background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-    .filter-button:hover { background-color: #ddd; }
+
+    /* FILTER BUTTONS IN BOTTOM-LEFT */
+    #filter {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: white;
+      padding: 8px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+
+    .filter-button {
+      margin: 4px;
+      padding: 6px 10px;
+      cursor: pointer;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .filter-button:hover {
+      background-color: #ddd;
+    }
+
+    /* LOGO IN UPPER-RIGHT */
+    #logo {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+    }
   </style>
 </head>
 <body>
+
+  <div id="logo">
+    <img src="https://diego-valhallab.github.io/Valhalla-Sighting-Log/valhalla-picto-black-yellow-1.png" alt="Valhalla Logo" style="height:40px;">
+  </div>
 
   <div id="filter"></div>
   <div id="map"></div>
@@ -71,6 +108,14 @@
     }
 
     function createPopupContent(row, behaviour) {
-      let popupContent = `<b>Behaviour:</b> ${behaviour}<b
+      let popupContent = `<b>Behaviour:</b> ${behaviour}<br>`;
+      if (row.SPECIES) popupContent += `<b>Species:</b> ${row.SPECIES}<br>`;
+      if (row.DATE || row.TIME) popupContent += `<b>Date:</b> ${row.DATE || ''} ${row.TIME || ''}<br>`;
 
-
+      const groupSize = row['# INDIVIDUALS'] || row['GROUP SIZE'];
+      const calves = row.CALVES;
+      if (groupSize) {
+        popupContent += `<b>Group size:</b> ${groupSize}`;
+        if (calves) popupContent += ` (calves: ${calves})`;
+        popupContent += `<br>`;
+      }
