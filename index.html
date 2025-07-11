@@ -66,6 +66,10 @@
 
     let allMarkers = [];
 
+    function normalizeBehaviour(value) {
+      return value ? value.trim().toUpperCase() : '';
+    }
+
     function addMarkers(data, behaviourFilter = null) {
       allMarkers.forEach(marker => map.removeLayer(marker));
       allMarkers = [];
@@ -73,7 +77,7 @@
       data.forEach(row => {
         const lat = parseFloat(row.LATITUDE);
         const lng = parseFloat(row.LONGITUDE);
-        const behaviour = row.BEHAVIOUR ? row.BEHAVIOUR.trim().toUpperCase() : '';
+        const behaviour = normalizeBehaviour(row.BEHAVIOUR);
 
         if (!isNaN(lat) && !isNaN(lng) && behaviour) {
           if (!behaviourFilter || behaviour === behaviourFilter) {
@@ -100,7 +104,7 @@
       skipEmptyLines: true,
       complete: function(results) {
         const data = results.data.filter(row => row.LATITUDE && row.LONGITUDE && row.BEHAVIOUR);
-        const behaviours = [...new Set(data.map(row => row.BEHAVIOUR).filter(b => b))];
+        const behaviours = [...new Set(data.map(row => normalizeBehaviour(row.BEHAVIOUR)).filter(b => b))];
 
         const filterDiv = document.getElementById('filter');
         filterDiv.innerHTML = `<span class="filter-button" onclick="addMarkers(window.data)">All</span>`;
@@ -108,8 +112,12 @@
           filterDiv.innerHTML += `<span class="filter-button" onclick="addMarkers(window.data, '${beh}')">${beh}</span>`;
         });
 
-        window.data = data;
-        addMarkers(data);
+        // Normalize BEHAVIOUR fields before saving
+        window.data = data.map(row => {
+          row.BEHAVIOUR = normalizeBehaviour(row.BEHAVIOUR);
+          return row;
+        });
+        addMarkers(window.data);
       }
     });
   </script>
