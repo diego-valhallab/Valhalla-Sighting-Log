@@ -8,11 +8,11 @@
   <style>
     #map { height: 100vh; }
 
-    /* FILTER BUTTONS IN BOTTOM-RIGHT */
+    /* FILTER BUTTONS IN BOTTOM-LEFT */
     #filter {
       position: absolute;
       bottom: 10px;
-      right: 10px;
+      left: 10px;
       background: white;
       padding: 8px;
       border-radius: 4px;
@@ -41,13 +41,29 @@
       right: 10px;
       z-index: 1000;
     }
+
+    /* TITLE CENTERED AT TOP */
+    #title {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 20px;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 6px 12px;
+      border-radius: 6px;
+      z-index: 1000;
+    }
   </style>
 </head>
 <body>
 
   <div id="logo">
-    <img src="https://diego-valhallab.github.io/Valhalla-Sighting-Log/valhalla-picto-black-yellow-1.png" alt="Valhalla Logo" style="height:60px;">
+    <img src="https://diego-valhallab.github.io/Valhalla-Sighting-Log/valhalla-picto-black-yellow-1.png" alt="Valhalla Logo" style="height:120px;">
   </div>
+
+  <div id="title">Valhallab Sighting & Behavior Map</div>
 
   <div id="filter"></div>
   <div id="map"></div>
@@ -169,6 +185,7 @@
   </script>
 
 </body>
-</html> 
+</html>
+ 
 
 
