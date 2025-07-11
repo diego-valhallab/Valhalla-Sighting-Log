@@ -71,66 +71,6 @@
     }
 
     function createPopupContent(row, behaviour) {
-      let popupContent = `<b>Behaviour:</b> ${behaviour}<br>`;
-      if (row.SPECIES) popupContent += `<b>Species:</b> ${row.SPECIES}<br>`;
-      if (row.DATE || row.TIME) popupContent += `<b>Date:</b> ${row.DATE || ''} ${row.TIME || ''}<br>`;
-      if (row['# INDIVIDUALS'] || row.CALVES || row['GROUP SIZE']) {
-        popupContent += `<b>Group:</b> `;
-        if (row['# INDIVIDUALS']) popupContent += `${row['# INDIVIDUALS']} ind. `;
-        if (row.CALVES) popupContent += `| ${row.CALVES} calves `;
-        if (row['GROUP SIZE']) popupContent += `| Group size: ${row['GROUP SIZE']}`;
-        popupContent += `<br>`;
-      }
-      if (row.WEATHER) popupContent += `<b>Weather:</b> ${row.WEATHER}<br>`;
-      if (row.NOTES) popupContent += `<b>Notes:</b> ${row.NOTES}<br>`;
-      return popupContent;
-    }
-
-    function addMarkers(data, behaviourFilter = null) {
-      allMarkers.forEach(marker => map.removeLayer(marker));
-      allMarkers = [];
-
-      data.forEach(row => {
-        const lat = parseFloat(row.LATITUDE);
-        const lng = parseFloat(row.LONGITUDE);
-        const behaviour = normalizeBehaviour(row.BEHAVIOUR);
-
-        if (!isNaN(lat) && !isNaN(lng) && behaviour) {
-          if (!behaviourFilter || behaviour === behaviourFilter) {
-            const popupContent = createPopupContent(row, behaviour);
-            const icon = icons[behaviour] || icons.default;
-            const marker = L.marker([lat, lng], { icon: icon }).addTo(map);
-            marker.bindPopup(popupContent);
-            allMarkers.push(marker);
-          }
-        }
-      });
-    }
-
-    Papa.parse(csvUrl, {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      complete: function(results) {
-        const data = results.data.filter(row => row.LATITUDE && row.LONGITUDE && row.BEHAVIOUR);
-        const behaviours = [...new Set(data.map(row => normalizeBehaviour(row.BEHAVIOUR)).filter(b => b))];
-
-        const filterDiv = document.getElementById('filter');
-        filterDiv.innerHTML = `<span class="filter-button" onclick="addMarkers(window.data)">All</span>`;
-        behaviours.forEach(beh => {
-          filterDiv.innerHTML += `<span class="filter-button" onclick="addMarkers(window.data, '${beh}')">${beh}</span>`;
-        });
-
-        window.data = data.map(row => {
-          row.BEHAVIOUR = normalizeBehaviour(row.BEHAVIOUR);
-          return row;
-        });
-        addMarkers(window.data);
-      }
-    });
-  </script>
-
-</body>
-</html>
+      let popupContent = `<b>Behaviour:</b> ${behaviour}<b
 
 
