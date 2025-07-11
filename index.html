@@ -8,25 +8,25 @@
   <style>
     #map { height: 100vh; }
 
-    /* FILTER BUTTONS stay in default position (top-left) */
+    /* FILTER BUTTONS IN BOTTOM-RIGHT */
     #filter {
-      padding: 10px;
-      background: white;
-      z-index: 1000;
       position: absolute;
-      top: 10px;
-      left: 10px;
+      bottom: 10px;
+      right: 10px;
+      background: white;
+      padding: 8px;
       border-radius: 4px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 1000;
     }
 
     .filter-button {
-      margin: 2px;
-      padding: 4px 8px;
+      margin: 4px;
+      padding: 6px 10px;
       cursor: pointer;
       background-color: #f0f0f0;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 6px;
       font-size: 14px;
     }
 
@@ -34,7 +34,7 @@
       background-color: #ddd;
     }
 
-    /* LOGO IN UPPER-RIGHT */
+    /* LOGO IN UPPER-RIGHT, BIGGER SIZE */
     #logo {
       position: absolute;
       top: 10px;
@@ -46,7 +46,7 @@
 <body>
 
   <div id="logo">
-    <img src="https://diego-valhallab.github.io/Valhalla-Sighting-Log/valhalla-picto-black-yellow-1.png" alt="Valhalla Logo" style="height:40px;">
+    <img src="https://diego-valhallab.github.io/Valhalla-Sighting-Log/valhalla-picto-black-yellow-1.png" alt="Valhalla Logo" style="height:60px;">
   </div>
 
   <div id="filter"></div>
@@ -169,7 +169,6 @@
   </script>
 
 </body>
-</html>
- 
+</html> 
 
 
