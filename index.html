@@ -70,6 +70,22 @@
       return value ? value.trim().toUpperCase() : '';
     }
 
+    function createPopupContent(row, behaviour) {
+      let popupContent = `<b>Behaviour:</b> ${behaviour}<br>`;
+      if (row.SPECIES) popupContent += `<b>Species:</b> ${row.SPECIES}<br>`;
+      if (row.DATE || row.TIME) popupContent += `<b>Date:</b> ${row.DATE || ''} ${row.TIME || ''}<br>`;
+      if (row['# INDIVIDUALS'] || row.CALVES || row['GROUP SIZE']) {
+        popupContent += `<b>Group:</b> `;
+        if (row['# INDIVIDUALS']) popupContent += `${row['# INDIVIDUALS']} ind. `;
+        if (row.CALVES) popupContent += `| ${row.CALVES} calves `;
+        if (row['GROUP SIZE']) popupContent += `| Group size: ${row['GROUP SIZE']}`;
+        popupContent += `<br>`;
+      }
+      if (row.WEATHER) popupContent += `<b>Weather:</b> ${row.WEATHER}<br>`;
+      if (row.NOTES) popupContent += `<b>Notes:</b> ${row.NOTES}<br>`;
+      return popupContent;
+    }
+
     function addMarkers(data, behaviourFilter = null) {
       allMarkers.forEach(marker => map.removeLayer(marker));
       allMarkers = [];
@@ -81,14 +97,7 @@
 
         if (!isNaN(lat) && !isNaN(lng) && behaviour) {
           if (!behaviourFilter || behaviour === behaviourFilter) {
-            const popupContent = `
-              <b>Species:</b> ${row.SPECIES || ''}<br>
-              <b>Behaviour:</b> ${behaviour}<br>
-              <b>Date:</b> ${row.DATE || ''} ${row.TIME || ''}<br>
-              <b>Individuals:</b> ${row['# INDIVIDUALS'] || ''} | Calves: ${row.CALVES || ''} | Group size: ${row['GROUP SIZE'] || ''}<br>
-              <b>Weather:</b> ${row.WEATHER || ''}<br>
-              <b>Notes:</b> ${row.NOTES || ''}
-            `;
+            const popupContent = createPopupContent(row, behaviour);
             const icon = icons[behaviour] || icons.default;
             const marker = L.marker([lat, lng], { icon: icon }).addTo(map);
             marker.bindPopup(popupContent);
@@ -112,7 +121,6 @@
           filterDiv.innerHTML += `<span class="filter-button" onclick="addMarkers(window.data, '${beh}')">${beh}</span>`;
         });
 
-        // Normalize BEHAVIOUR fields before saving
         window.data = data.map(row => {
           row.BEHAVIOUR = normalizeBehaviour(row.BEHAVIOUR);
           return row;
