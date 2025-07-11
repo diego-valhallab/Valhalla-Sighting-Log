@@ -1,3 +1,4 @@
+ 
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,31 +9,36 @@
   <style>
     #map { height: 100vh; }
 
-    /* FILTER BUTTONS IN BOTTOM-LEFT */
+    /* FILTER BUTTONS IN BOTTOM-LEFT, TRANSPARENT BACKGROUND */
     #filter {
       position: absolute;
       bottom: 10px;
       left: 10px;
-      background: white;
-      padding: 8px;
+      padding: 4px;
       border-radius: 4px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       z-index: 1000;
     }
 
     .filter-button {
-      margin: 4px;
+      margin: 2px;
       padding: 6px 10px;
       cursor: pointer;
-      background-color: #f0f0f0;
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 14px;
+      color: white;
     }
 
     .filter-button:hover {
-      background-color: #ddd;
+      opacity: 0.85;
     }
+
+    /* Individual colors matching marker icons */
+    .filter-feeding { background-color: #007bff; } /* Blue */
+    .filter-socializing { background-color: #fd7e14; } /* Orange */
+    .filter-traveling { background-color: #28a745; } /* Green */
+    .filter-resting { background-color: #6f42c1; } /* Violet */
+    .filter-all { background-color: #6c757d; } /* Grey for 'All' button */
 
     /* LOGO IN UPPER-RIGHT, BIGGER SIZE */
     #logo {
@@ -170,9 +176,16 @@
         const behaviours = [...new Set(data.map(row => normalizeBehaviour(row.BEHAVIOUR)).filter(b => b))];
 
         const filterDiv = document.getElementById('filter');
-        filterDiv.innerHTML = `<span class="filter-button" onclick="addMarkers(window.data)">All</span>`;
+        filterDiv.innerHTML = `<span class="filter-button filter-all" onclick="addMarkers(window.data)">All</span>`;
         behaviours.forEach(beh => {
-          filterDiv.innerHTML += `<span class="filter-button" onclick="addMarkers(window.data, '${beh}')">${beh}</span>`;
+          let cssClass = '';
+          if (beh === 'FEEDING') cssClass = 'filter-feeding';
+          else if (beh === 'SOCIALIZING') cssClass = 'filter-socializing';
+          else if (beh === 'TRAVELING') cssClass = 'filter-traveling';
+          else if (beh === 'RESTING') cssClass = 'filter-resting';
+          else cssClass = 'filter-all';
+
+          filterDiv.innerHTML += `<span class="filter-button ${cssClass}" onclick="addMarkers(window.data, '${beh}')">${beh}</span>`;
         });
 
         window.data = data.map(row => {
@@ -186,6 +199,6 @@
 
 </body>
 </html>
- 
+
 
 
